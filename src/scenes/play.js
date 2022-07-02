@@ -1,11 +1,15 @@
 // Declaracion de variables para esta escena
 var player;
 var stars;
+var anillo;
 var bombs;
 var cursors;
 var score;
 var gameOver;
 var scoreText;
+
+var sonidomusica;
+var sonidomoneda;
 
 // Clase Play, donde se crean todos los sprites, el escenario del juego y se inicializa y actualiza toda la logica del juego.
 export class Play extends Phaser.Scene {
@@ -22,9 +26,17 @@ export class Play extends Phaser.Scene {
     this.load.image("tilesPlatform3", "public/assets/images/platforma3.png");
     this.load.image("tilesBase", "public/assets/images/base.png");
 
+  
+  }
+
+  init(data) {
+    // recupera el valor SCORE enviado como dato al inicio de la escena
+    score = data.score;
   }
 
   create() {
+
+    
 
     //tilemap
     const map = this.make.tilemap({ key: "map" });
@@ -46,15 +58,29 @@ export class Play extends Phaser.Scene {
 
     worldLayer.setCollisionByProperty({ collides: true });
 
-    
-    /*
-    const debugGraphics = this.add.graphics().setAlpha(0.75);
-    worldLayer.renderDebug(debugGraphics, {
-      tileColor: null, // Color of non-colliding tiles
-      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-      faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
-    });
-    */
+
+    //plataformas
+
+    var platforms = this.physics.add.staticGroup();
+
+  
+    platforms.create(400, 568, 'base').setScale(2).refreshBody();
+ 
+    platforms.create(70, 440, 'plataforma2');
+    platforms.create(700, 450, 'plataforma');
+ 
+     
+    platforms.create(340, 320, 'plataforma2');
+    platforms.create(610, 300, 'plataforma3');
+ 
+ 
+    platforms.create(500, 130, 'plataforma3');
+     
+    platforms.create(30, 220, 'plataforma3');
+    platforms.create(850, 200, 'plataforma2');
+ 
+    platforms.create(30, 100, 'plataforma3');
+
 
     //personaje
     const spawnPoint = map.findObject("Objetos", (obj) => obj.name === "dude");
@@ -64,53 +90,72 @@ export class Play extends Phaser.Scene {
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
 
-    //  Input Events
+   //teclado
     if ((cursors = !undefined)) {
       cursors = this.input.keyboard.createCursorKeys();
     }
 
-    // Create empty group of starts
-    stars = this.physics.add.group();
+    
+   //monedas
+    stars = this.physics.add.group({
+    key: 'moneda',
+    repeat: 10,
+    setXY: { x: 100, y: 0, stepX: 68 }
+    } );
 
-    // find object layer
-    // if type is "stars", add to stars group
-    objectsLayer.objects.forEach((objData) => {
-      //console.log(objData.name, objData.type, objData.x, objData.y);
+    stars.children.iterate(function (child) {
 
-      const { x = 0, y = 0, name, type } = objData;
-      switch (type) {
-        case "stars": {
-          // add star to scene
-          // console.log("estrella agregada: ", x, y);
-          var star = stars.create(x, y, "star");
-          star.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-          break;
-        }
-      }
+    
+    child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+
     });
 
-    // Create empty group of bombs
+    //anillo
+    anillo = this.physics.add.group({
+    key: 'anillo',
+    repeat: 0,
+    setXY: { x: 50, y: 0, }
+    } );
+    
+
+    
     bombs = this.physics.add.group();
+    
+    var x =
+        player.x < 400
+          ? Phaser.Math.Between(400, 800)
+          : Phaser.Math.Between(0, 400);
 
-    //  The score
-    scoreText = this.add.text(30, 6, "score: 0", {
-      fontSize: "32px",
-      fill: "#000",
-    });
+      var bomb = bombs.create(x, 16, "bomb");
+      bomb.setBounce(1);
+      bomb.setCollideWorldBounds(true);
+      bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
 
-    // Collide the player and the stars with the platforms
-    // REPLACE Add collision with worldLayer
-    this.physics.add.collider(player, worldLayer);
-    this.physics.add.collider(stars, worldLayer);
-    this.physics.add.collider(bombs, worldLayer);
+      var bomb2 = bombs.create(x, 16, "bomb");
+      bomb2.setBounce(1);
+      bomb2.setCollideWorldBounds(true);
+      bomb2.setVelocity(Phaser.Math.Between(-200, 200), 20);
+      
+    
+    scoreText = this.add.text(560, 16, 'Puntos: 0', { fontFamily: 'Times', fontStyle: 'italic', fontSize: '32px', fill: '#D9120C' });
+    var nivelText = this.add.text(16, 16, 'Nivel: 2', { fontFamily: 'Times', fontStyle: 'italic', fontSize: '32px', fill: '#D9120C' });
 
-    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
+    //colisiones
+    
+    this.physics.add.collider(player, platforms);
+    this.physics.add.collider(anillo, platforms);
+    this.physics.add.collider(stars, platforms);
+    this.physics.add.collider(bombs, platforms);
+
+   
     this.physics.add.overlap(player, stars, this.collectStar, null, this);
-
+    this.physics.add.overlap(player, anillo, this.collectAnillo, null, this);
     this.physics.add.collider(player, bombs, this.hitBomb, null, this);
 
     gameOver = false;
     score = 0;
+
+
   }
 
   update() {
@@ -132,7 +177,7 @@ export class Play extends Phaser.Scene {
       player.anims.play("turn");
     }
 
-    // REPLACE player.body.touching.down
+    
     if (cursors.up.isDown && player.body.blocked.down) {
       player.setVelocityY(-330);
     }
@@ -140,29 +185,32 @@ export class Play extends Phaser.Scene {
 
   collectStar(player, star) {
     star.disableBody(true, true);
+   
 
-    //  Add and update the score
+    
     score += 10;
     scoreText.setText("Score: " + score);
 
     if (stars.countActive(true) === 0) {
-      //  A new batch of stars to collect
-      stars.children.iterate(function (child) {
-        child.enableBody(true, child.x, child.y + 10, true, true);
-      });
+      
+      this.scene.start("Retry", { score: score });
 
-      var x =
-        player.x < 400
-          ? Phaser.Math.Between(400, 800)
-          : Phaser.Math.Between(0, 400);
-
-      var bomb = bombs.create(x, 16, "bomb");
-      bomb.setBounce(1);
-      bomb.setCollideWorldBounds(true);
-      bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+     
     }
   }
 
+  collectAnillo(player, star) {
+    star.disableBody(true, true);
+   
+
+    
+    score += 50;
+    scoreText.setText("Score: " + score);
+
+    
+  }
+
+  
   hitBomb(player, bomb) {
     this.physics.pause();
 

@@ -45,7 +45,7 @@ export class Retry extends Phaser.Scene {
       this,
       () => {
         // Instrucción para pasar a la escena Play
-        this.scene.start("Play");
+        this.scene.start("Play2");
       }
     );
   }

@@ -9,18 +9,29 @@ export class Preloads extends Phaser.Scene {
   preload() {
     this.load.image("sad_cow", "public/assets/images/sad_cow.png");
     this.load.image("phaser_logo", "public/assets/images/phaser_logo.png");
-    this.load.image(
-      "mainmenu_bg",
-      "public/assets/images/main_menu_background.png"
-    );
+    this.load.image("mainmenu_bg","public/assets/images/main_menu_background.png");
+
+    //fondo
     this.load.image("sky", "public/assets/images/sky.png");
-    this.load.image("ground", "public/assets/images/platform.png");
     this.load.image("star", "public/assets/images/star.png");
+    
+    this.load.spritesheet("dude", "public/assets/images/dude.png", {frameWidth: 32, frameHeight: 48 });
+
+    //tilemap
+    this.load.tilemapTiledJSON("map1", "/assets/tilemap/tilemap1.json");
+        
+    //plataformas
+    this.load.image("base", "public/assets/images/base.png");
+    this.load.image("plataforma", "public/assets/images/plataforma.png");
+    this.load.image("plataforma2", "public/assets/images/plataforma2.png");
+    this.load.image("plataforma3", "public/assets/images/plataforma3.png");
+
+    //objetos
+    this.load.image("anillo", "public/assets/images/anillo.png");
+    this.load.image("moneda", "public/assets/images/moneda.png");
     this.load.image("bomb", "public/assets/images/bomb.png");
-    this.load.spritesheet("dude", "public/assets/images/dude.png", {
-      frameWidth: 32,
-      frameHeight: 48,
-    });
+
+    this.load.audio('sonidomusica', 'public/assets/sounds/musica.mp3');
   }
 
   create() {
