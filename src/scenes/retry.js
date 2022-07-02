@@ -41,7 +41,7 @@ export class Retry extends Phaser.Scene {
     const boton = new Button(
       this.cameras.main.centerX,
       this.cameras.main.centerY + this.cameras.main.centerY / 3,
-      "Retry",
+      "Jugar de nuevo",
       this,
       () => {
         // Instrucción para pasar a la escena Play

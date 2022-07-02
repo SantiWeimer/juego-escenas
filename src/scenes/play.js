@@ -17,28 +17,36 @@ export class Play extends Phaser.Scene {
   preload() {
     this.load.tilemapTiledJSON("map", "public/assets/tilemaps/map.json");
     this.load.image("tilesBelow", "public/assets/images/sky_atlas.png");
-    this.load.image("tilesPlatform", "public/assets/images/platform_atlas.png");
+    this.load.image("tilesPlatform", "public/assets/images/platforma.png");
+    this.load.image("tilesPlatform2", "public/assets/images/platforma2.png");
+    this.load.image("tilesPlatform3", "public/assets/images/platforma3.png");
+    this.load.image("tilesBase", "public/assets/images/base.png");
+
   }
 
   create() {
+
+    //tilemap
     const map = this.make.tilemap({ key: "map" });
 
-    // Parameters are the name you gave the tileset in Tiled and then the key of the tileset image in
-    // Phaser's cache (i.e. the name you used in preload)
+  
     const tilesetBelow = map.addTilesetImage("sky_atlas", "tilesBelow");
-    const tilesetPlatform = map.addTilesetImage(
-      "platform_atlas",
-      "tilesPlatform"
-    );
+    const tilesetPlatform = map.addTilesetImage("platforma","tilesPlatform");
+    const tilesetPlatform2 = map.addTilesetImage("platforma2","tilesPlatform");
+    const tilesetPlatform3 = map.addTilesetImage("platforma3","tilesPlatform");
+    const tilesetBase = map.addTilesetImage("base","tilesBase");
 
     // Parameters: layer name (or index) from Tiled, tileset, x, y
     const belowLayer = map.createLayer("Fondo", tilesetBelow, 0, 0);
     const worldLayer = map.createLayer("Plataformas", tilesetPlatform, 0, 0);
+    const worldLayer2 = map.createLayer("Plataformas2", tilesetPlatform2, 0, 0);
+    const worldLayer3 = map.createLayer("Plataformas3", tilesetPlatform3, 0, 0);
+
     const objectsLayer = map.getObjectLayer("Objetos");
 
     worldLayer.setCollisionByProperty({ collides: true });
 
-    // tiles marked as colliding
+    
     /*
     const debugGraphics = this.add.graphics().setAlpha(0.75);
     worldLayer.renderDebug(debugGraphics, {
@@ -48,12 +56,11 @@ export class Play extends Phaser.Scene {
     });
     */
 
-    // Find in the Object Layer, the name "dude" and get position
+    //personaje
     const spawnPoint = map.findObject("Objetos", (obj) => obj.name === "dude");
-    // The player and its settings
+  
     player = this.physics.add.sprite(spawnPoint.x, spawnPoint.y, "dude");
 
-    //  Player physics properties. Give the little guy a slight bounce.
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
 
@@ -165,13 +172,13 @@ export class Play extends Phaser.Scene {
 
     gameOver = true;
 
-    // Función timeout usada para llamar la instrucción que tiene adentro despues de X milisegundos
+    
     setTimeout(() => {
-      // Instrucción que sera llamada despues del segundo
+     
       this.scene.start(
         "Retry",
         { score: score } // se pasa el puntaje como dato a la escena RETRY
       );
-    }, 1000); // Ese número es la cantidad de milisegundos
+    }, 1000); 
   }
 }
